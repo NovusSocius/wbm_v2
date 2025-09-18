@@ -1,191 +1,32 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronRight, ChevronDown, Folder, File, ExternalLink } from "lucide-react";
-
-interface SiteNode {
-  name: string;
-  path: string;
-  type: 'folder' | 'file';
-  children?: SiteNode[];
-  snapshots?: number;
-  lastSnapshot?: string;
-}
+import { getWebsiteData, SiteNode } from "@/data/mockWebsiteData";
 
 const SiteMap = () => {
   const { url } = useParams();
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['/']));
 
   const decodedUrl = url ? decodeURIComponent(url) : '';
+  const websiteData = getWebsiteData(decodedUrl);
 
-  // Mock site structure data
-  const mockSiteData: SiteNode = {
-    name: decodedUrl || 'example.com',
-    path: '/',
-    type: 'folder',
-    snapshots: 1247,
-    lastSnapshot: '2023-12-15',
-    children: [
-      {
-        name: 'index.html',
-        path: '/index.html',
-        type: 'file',
-        snapshots: 156,
-        lastSnapshot: '2023-12-15'
-      },
-      {
-        name: 'about',
-        path: '/about',
-        type: 'folder',
-        snapshots: 89,
-        lastSnapshot: '2023-12-10',
-        children: [
-          {
-            name: 'index.html',
-            path: '/about/index.html',
-            type: 'file',
-            snapshots: 45,
-            lastSnapshot: '2023-12-10'
-          },
-          {
-            name: 'team.html',
-            path: '/about/team.html',
-            type: 'file',
-            snapshots: 23,
-            lastSnapshot: '2023-11-28'
-          },
-          {
-            name: 'history.html',
-            path: '/about/history.html',
-            type: 'file',
-            snapshots: 21,
-            lastSnapshot: '2023-10-15'
-          }
-        ]
-      },
-      {
-        name: 'products',
-        path: '/products',
-        type: 'folder',
-        snapshots: 342,
-        lastSnapshot: '2023-12-14',
-        children: [
-          {
-            name: 'index.html',
-            path: '/products/index.html',
-            type: 'file',
-            snapshots: 78,
-            lastSnapshot: '2023-12-14'
-          },
-          {
-            name: 'software',
-            path: '/products/software',
-            type: 'folder',
-            snapshots: 156,
-            lastSnapshot: '2023-12-12',
-            children: [
-              {
-                name: 'index.html',
-                path: '/products/software/index.html',
-                type: 'file',
-                snapshots: 89,
-                lastSnapshot: '2023-12-12'
-              },
-              {
-                name: 'download.html',
-                path: '/products/software/download.html',
-                type: 'file',
-                snapshots: 67,
-                lastSnapshot: '2023-12-01'
-              }
-            ]
-          },
-          {
-            name: 'services',
-            path: '/products/services',
-            type: 'folder',
-            snapshots: 108,
-            lastSnapshot: '2023-11-30',
-            children: [
-              {
-                name: 'consulting.html',
-                path: '/products/services/consulting.html',
-                type: 'file',
-                snapshots: 54,
-                lastSnapshot: '2023-11-30'
-              },
-              {
-                name: 'support.html',
-                path: '/products/services/support.html',
-                type: 'file',
-                snapshots: 54,
-                lastSnapshot: '2023-11-25'
-              }
-            ]
-          }
-        ]
-      },
-      {
-        name: 'news',
-        path: '/news',
-        type: 'folder',
-        snapshots: 234,
-        lastSnapshot: '2023-12-13',
-        children: [
-          {
-            name: 'index.html',
-            path: '/news/index.html',
-            type: 'file',
-            snapshots: 89,
-            lastSnapshot: '2023-12-13'
-          },
-          {
-            name: '2023',
-            path: '/news/2023',
-            type: 'folder',
-            snapshots: 145,
-            lastSnapshot: '2023-12-13',
-            children: [
-              {
-                name: 'announcement.html',
-                path: '/news/2023/announcement.html',
-                type: 'file',
-                snapshots: 67,
-                lastSnapshot: '2023-12-13'
-              },
-              {
-                name: 'updates.html',
-                path: '/news/2023/updates.html',
-                type: 'file',
-                snapshots: 78,
-                lastSnapshot: '2023-12-01'
-              }
-            ]
-          }
-        ]
-      },
-      {
-        name: 'contact.html',
-        path: '/contact.html',
-        type: 'file',
-        snapshots: 67,
-        lastSnapshot: '2023-11-20'
-      },
-      {
-        name: 'sitemap.xml',
-        path: '/sitemap.xml',
-        type: 'file',
-        snapshots: 23,
-        lastSnapshot: '2023-10-15'
-      },
-      {
-        name: 'robots.txt',
-        path: '/robots.txt',
-        type: 'file',
-        snapshots: 12,
-        lastSnapshot: '2023-08-10'
-      }
-    ]
-  };
+  if (!websiteData && decodedUrl) {
+    return (
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="text-center">
+          <h1 className="archive-header">Website Not Found</h1>
+          <p className="text-muted-foreground">
+            No archived data found for: <span className="text-primary font-mono">{decodedUrl}</span>
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Try searching for "example.com" or "github.com"
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const siteData = websiteData?.siteStructure;
 
   const toggleNode = (path: string) => {
     const newExpanded = new Set(expandedNodes);
@@ -276,25 +117,27 @@ const SiteMap = () => {
         </div>
         
         <div className="p-2">
-          {renderNode(mockSiteData)}
+          {siteData && renderNode(siteData)}
         </div>
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-card border border-border p-4 text-center">
-          <div className="text-2xl font-bold text-primary">1,247</div>
-          <div className="text-sm text-muted-foreground">Total Snapshots</div>
+      {websiteData && (
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-card border border-border p-4 text-center">
+            <div className="text-2xl font-bold text-primary">{websiteData.totalSnapshots.toLocaleString()}</div>
+            <div className="text-sm text-muted-foreground">Total Snapshots</div>
+          </div>
+          <div className="bg-card border border-border p-4 text-center">
+            <div className="text-2xl font-bold text-primary">{websiteData.uniqueUrls}</div>
+            <div className="text-sm text-muted-foreground">Unique Paths</div>
+          </div>
+          <div className="bg-card border border-border p-4 text-center">
+            <div className="text-2xl font-bold text-primary">{websiteData.lastCapture}</div>
+            <div className="text-sm text-muted-foreground">Last Capture</div>
+          </div>
         </div>
-        <div className="bg-card border border-border p-4 text-center">
-          <div className="text-2xl font-bold text-primary">23</div>
-          <div className="text-sm text-muted-foreground">Unique Paths</div>
-        </div>
-        <div className="bg-card border border-border p-4 text-center">
-          <div className="text-2xl font-bold text-primary">Dec 15, 2023</div>
-          <div className="text-sm text-muted-foreground">Last Capture</div>
-        </div>
-      </div>
+      )}
 
       {/* Navigation Links */}
       {decodedUrl && (

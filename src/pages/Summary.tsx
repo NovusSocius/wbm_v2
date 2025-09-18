@@ -1,45 +1,32 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { BarChart3, PieChart, Calendar, TrendingUp } from "lucide-react";
+import { getWebsiteData } from "@/data/mockWebsiteData";
 
 const Summary = () => {
   const { url } = useParams();
   const decodedUrl = url ? decodeURIComponent(url) : '';
+  const websiteData = getWebsiteData(decodedUrl);
 
-  // Mock data for charts and statistics
-  const mimeTypes = [
-    { type: 'text/html', count: 456, percentage: 45.6 },
-    { type: 'image/jpeg', count: 234, percentage: 23.4 },
-    { type: 'image/png', count: 123, percentage: 12.3 },
-    { type: 'text/css', count: 89, percentage: 8.9 },
-    { type: 'application/javascript', count: 67, percentage: 6.7 },
-    { type: 'application/pdf', count: 31, percentage: 3.1 }
-  ];
+  if (!websiteData && decodedUrl) {
+    return (
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="text-center">
+          <h1 className="archive-header">Website Not Found</h1>
+          <p className="text-muted-foreground">
+            No archived data found for: <span className="text-primary font-mono">{decodedUrl}</span>
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Try searching for "example.com" or "github.com"
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  const recentCaptures = [
-    { date: '2023-12-15', time: '14:23:45', status: '200', size: '24.5 KB', url: '/index.html' },
-    { date: '2023-12-14', time: '09:15:23', status: '200', size: '18.2 KB', url: '/products/index.html' },
-    { date: '2023-12-13', time: '16:42:10', status: '200', size: '15.8 KB', url: '/news/index.html' },
-    { date: '2023-12-12', time: '11:30:55', status: '200', size: '22.1 KB', url: '/about/index.html' },
-    { date: '2023-12-11', time: '13:45:33', status: '200', size: '8.9 KB', url: '/contact.html' },
-    { date: '2023-12-10', time: '10:20:18', status: '200', size: '12.4 KB', url: '/about/team.html' },
-    { date: '2023-12-09', time: '15:55:42', status: '404', size: '2.1 KB', url: '/old-page.html' },
-    { date: '2023-12-08', time: '08:12:05', status: '200', size: '45.3 KB', url: '/products/brochure.pdf' },
-    { date: '2023-12-07', time: '12:38:27', status: '200', size: '156.7 KB', url: '/images/banner.jpg' },
-    { date: '2023-12-06', time: '17:25:14', status: '200', size: '3.2 KB', url: '/css/style.css' }
-  ];
+  if (!websiteData) return null;
 
-  const yearlyStats = [
-    { year: '2023', captures: 89 },
-    { year: '2022', captures: 156 },
-    { year: '2021', captures: 134 },
-    { year: '2020', captures: 178 },
-    { year: '2019', captures: 145 },
-    { year: '2018', captures: 123 },
-    { year: '2017', captures: 98 },
-    { year: '2016', captures: 76 }
-  ];
-
+  const { mimeTypes, yearlyStats, recentCaptures, totalSnapshots, uniqueUrls, timeSpan, firstCapture, lastCapture } = websiteData;
   const maxCaptures = Math.max(...yearlyStats.map(s => s.captures));
 
   return (
@@ -57,19 +44,19 @@ const Summary = () => {
       {/* Key Statistics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-card border border-border p-4 text-center">
-          <div className="text-2xl font-bold text-primary">1,247</div>
+          <div className="text-2xl font-bold text-primary">{totalSnapshots.toLocaleString()}</div>
           <div className="text-sm text-muted-foreground">Total Snapshots</div>
         </div>
         <div className="bg-card border border-border p-4 text-center">
-          <div className="text-2xl font-bold text-primary">23</div>
+          <div className="text-2xl font-bold text-primary">{uniqueUrls}</div>
           <div className="text-sm text-muted-foreground">Unique URLs</div>
         </div>
         <div className="bg-card border border-border p-4 text-center">
-          <div className="text-2xl font-bold text-primary">24y</div>
+          <div className="text-2xl font-bold text-primary">{timeSpan}</div>
           <div className="text-sm text-muted-foreground">Time Span</div>
         </div>
         <div className="bg-card border border-border p-4 text-center">
-          <div className="text-2xl font-bold text-primary">6</div>
+          <div className="text-2xl font-bold text-primary">{mimeTypes.length}</div>
           <div className="text-sm text-muted-foreground">MIME Types</div>
         </div>
       </div>
@@ -182,19 +169,19 @@ const Summary = () => {
           <PieChart className="w-5 h-5" />
           <span>Archive Timeline</span>
         </h2>
-        <div className="space-y-4">
+          <div className="space-y-4">
           <div className="flex items-center justify-between p-3 bg-muted rounded">
             <div>
               <div className="font-semibold">First Capture</div>
-              <div className="text-sm text-muted-foreground">March 15, 1999</div>
+              <div className="text-sm text-muted-foreground">{firstCapture}</div>
             </div>
             <div className="text-right">
               <div className="font-semibold">Last Capture</div>
-              <div className="text-sm text-muted-foreground">December 15, 2023</div>
+              <div className="text-sm text-muted-foreground">{lastCapture}</div>
             </div>
           </div>
           <div className="text-center text-sm text-muted-foreground">
-            <strong>24 years</strong> of continuous archiving
+            <strong>{timeSpan}</strong> of continuous archiving
           </div>
         </div>
       </div>
