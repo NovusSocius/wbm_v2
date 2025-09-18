@@ -1,0 +1,160 @@
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const Calendar = () => {
+  const { url } = useParams();
+  const [currentYear, setCurrentYear] = useState(2023);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  
+  const years = Array.from({ length: 28 }, (_, i) => 1996 + i);
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+
+  // Mock data for demonstration
+  const generateMockData = (year: number, month: number) => {
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const data: { [key: string]: number } = {};
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      // Random snapshots with some days having none
+      const snapshots = Math.random() > 0.3 ? Math.floor(Math.random() * 20) + 1 : 0;
+      if (snapshots > 0) {
+        data[`${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`] = snapshots;
+      }
+    }
+    return data;
+  };
+
+  const getHeatmapClass = (count: number) => {
+    if (count === 0) return 'heatmap-empty';
+    if (count <= 3) return 'heatmap-low';
+    if (count <= 10) return 'heatmap-medium';
+    return 'heatmap-high';
+  };
+
+  const decodedUrl = url ? decodeURIComponent(url) : '';
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="archive-header">Calendar View</h1>
+          {decodedUrl && (
+            <p className="text-sm text-muted-foreground font-mono">
+              Showing snapshots for: <span className="text-primary">{decodedUrl}</span>
+            </p>
+          )}
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setCurrentYear(Math.max(1996, currentYear - 1))}
+            disabled={currentYear <= 1996}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <span className="text-lg font-bold min-w-16 text-center">{currentYear}</span>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setCurrentYear(Math.min(2023, currentYear + 1))}
+            disabled={currentYear >= 2023}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Year Grid */}
+      <div className="bg-card border border-border p-6">
+        <div className="grid grid-cols-12 gap-4">
+          {months.map((month, monthIndex) => {
+            const monthData = generateMockData(currentYear, monthIndex + 1);
+            const daysInMonth = new Date(currentYear, monthIndex + 1, 0).getDate();
+            
+            return (
+              <div key={month} className="space-y-2">
+                <h3 className="text-sm font-bold text-center">{month}</h3>
+                <div className="grid grid-cols-7 gap-1">
+                  {Array.from({ length: daysInMonth }, (_, day) => {
+                    const dateStr = `${currentYear}-${(monthIndex + 1).toString().padStart(2, '0')}-${(day + 1).toString().padStart(2, '0')}`;
+                    const count = monthData[dateStr] || 0;
+                    
+                    return (
+                      <button
+                        key={day}
+                        className={`heatmap-cell ${getHeatmapClass(count)} text-xs hover:ring-1 hover:ring-primary`}
+                        onClick={() => setSelectedDate(count > 0 ? dateStr : null)}
+                        title={count > 0 ? `${count} snapshots on ${dateStr}` : `No snapshots on ${dateStr}`}
+                      >
+                        {day + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center justify-center space-x-4 text-sm">
+        <span>Less</span>
+        <div className="flex space-x-1">
+          <div className="heatmap-cell heatmap-empty"></div>
+          <div className="heatmap-cell heatmap-low"></div>
+          <div className="heatmap-cell heatmap-medium"></div>
+          <div className="heatmap-cell heatmap-high"></div>
+        </div>
+        <span>More</span>
+      </div>
+
+      {/* Selected Date Info */}
+      {selectedDate && (
+        <div className="bg-card border border-border p-4">
+          <h3 className="font-bold mb-2">Snapshots for {selectedDate}</h3>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span>12:34:56 AM</span>
+              <Link to="#" className="archive-link flex items-center space-x-1">
+                <span>View snapshot</span>
+                <ExternalLink className="w-3 h-3" />
+              </Link>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span>06:15:23 PM</span>
+              <Link to="#" className="archive-link flex items-center space-x-1">
+                <span>View snapshot</span>
+                <ExternalLink className="w-3 h-3" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Navigation Links */}
+      {decodedUrl && (
+        <div className="flex justify-center space-x-4">
+          <Link to={`/sitemap/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+            Site Map
+          </Link>
+          <Link to={`/urls/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+            URL List
+          </Link>
+          <Link to={`/summary/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+            Summary
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Calendar;
