@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getWebsiteData, generateCalendarData } from "@/data/mockWebsiteData";
 
 const Calendar = () => {
   const { url } = useParams();
@@ -15,8 +14,20 @@ const Calendar = () => {
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
 
-  const decodedUrl = url ? decodeURIComponent(url) : '';
-  const websiteData = getWebsiteData(decodedUrl);
+  // Mock data for demonstration
+  const generateMockData = (year: number, month: number) => {
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const data: { [key: string]: number } = {};
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      // Random snapshots with some days having none
+      const snapshots = Math.random() > 0.3 ? Math.floor(Math.random() * 20) + 1 : 0;
+      if (snapshots > 0) {
+        data[`${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`] = snapshots;
+      }
+    }
+    return data;
+  };
 
   const getHeatmapClass = (count: number) => {
     if (count === 0) return 'heatmap-empty';
@@ -25,21 +36,7 @@ const Calendar = () => {
     return 'heatmap-high';
   };
 
-  if (!websiteData && decodedUrl) {
-    return (
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="text-center">
-          <h1 className="archive-header">Website Not Found</h1>
-          <p className="text-muted-foreground">
-            No archived data found for: <span className="text-primary font-mono">{decodedUrl}</span>
-          </p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Try searching for "example.com" or "github.com"
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const decodedUrl = url ? decodeURIComponent(url) : '';
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -78,7 +75,7 @@ const Calendar = () => {
       <div className="bg-card border border-border p-6">
         <div className="grid grid-cols-12 gap-4">
           {months.map((month, monthIndex) => {
-            const monthData = generateCalendarData(decodedUrl, currentYear, monthIndex + 1);
+            const monthData = generateMockData(currentYear, monthIndex + 1);
             const daysInMonth = new Date(currentYear, monthIndex + 1, 0).getDate();
             
             return (

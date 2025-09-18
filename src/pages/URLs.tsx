@@ -3,7 +3,15 @@ import { useParams, Link } from "react-router-dom";
 import { ExternalLink, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { getWebsiteData } from "@/data/mockWebsiteData";
+
+interface URLEntry {
+  url: string;
+  snapshots: number;
+  firstCapture: string;
+  lastCapture: string;
+  mimeType: string;
+  status: string;
+}
 
 const URLs = () => {
   const { url } = useParams();
@@ -12,25 +20,130 @@ const URLs = () => {
   const itemsPerPage = 25;
 
   const decodedUrl = url ? decodeURIComponent(url) : '';
-  const websiteData = getWebsiteData(decodedUrl);
 
-  if (!websiteData && decodedUrl) {
-    return (
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="text-center">
-          <h1 className="archive-header">Website Not Found</h1>
-          <p className="text-muted-foreground">
-            No archived data found for: <span className="text-primary font-mono">{decodedUrl}</span>
-          </p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Try searching for "example.com" or "github.com"
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const mockURLs = websiteData?.urls || [];
+  // Mock URL data
+  const mockURLs: URLEntry[] = [
+    {
+      url: '/index.html',
+      snapshots: 156,
+      firstCapture: '1999-03-15',
+      lastCapture: '2023-12-15',
+      mimeType: 'text/html',
+      status: '200'
+    },
+    {
+      url: '/about/index.html',
+      snapshots: 45,
+      firstCapture: '2000-01-20',
+      lastCapture: '2023-12-10',
+      mimeType: 'text/html',
+      status: '200'
+    },
+    {
+      url: '/about/team.html',
+      snapshots: 23,
+      firstCapture: '2001-06-10',
+      lastCapture: '2023-11-28',
+      mimeType: 'text/html',
+      status: '200'
+    },
+    {
+      url: '/products/index.html',
+      snapshots: 78,
+      firstCapture: '2000-08-05',
+      lastCapture: '2023-12-14',
+      mimeType: 'text/html',
+      status: '200'
+    },
+    {
+      url: '/products/software/download.html',
+      snapshots: 67,
+      firstCapture: '2002-03-12',
+      lastCapture: '2023-12-01',
+      mimeType: 'text/html',
+      status: '200'
+    },
+    {
+      url: '/news/index.html',
+      snapshots: 89,
+      firstCapture: '2001-09-20',
+      lastCapture: '2023-12-13',
+      mimeType: 'text/html',
+      status: '200'
+    },
+    {
+      url: '/images/logo.png',
+      snapshots: 34,
+      firstCapture: '2002-01-15',
+      lastCapture: '2023-10-20',
+      mimeType: 'image/png',
+      status: '200'
+    },
+    {
+      url: '/css/style.css',
+      snapshots: 89,
+      firstCapture: '2001-05-30',
+      lastCapture: '2023-11-15',
+      mimeType: 'text/css',
+      status: '200'
+    },
+    {
+      url: '/js/script.js',
+      snapshots: 45,
+      firstCapture: '2003-02-10',
+      lastCapture: '2023-09-25',
+      mimeType: 'application/javascript',
+      status: '200'
+    },
+    {
+      url: '/contact.html',
+      snapshots: 67,
+      firstCapture: '2000-12-05',
+      lastCapture: '2023-11-20',
+      mimeType: 'text/html',
+      status: '200'
+    },
+    {
+      url: '/sitemap.xml',
+      snapshots: 23,
+      firstCapture: '2004-06-15',
+      lastCapture: '2023-10-15',
+      mimeType: 'application/xml',
+      status: '200'
+    },
+    {
+      url: '/robots.txt',
+      snapshots: 12,
+      firstCapture: '2003-01-20',
+      lastCapture: '2023-08-10',
+      mimeType: 'text/plain',
+      status: '200'
+    },
+    {
+      url: '/api/data.json',
+      snapshots: 156,
+      firstCapture: '2010-03-10',
+      lastCapture: '2023-12-12',
+      mimeType: 'application/json',
+      status: '200'
+    },
+    {
+      url: '/products/brochure.pdf',
+      snapshots: 34,
+      firstCapture: '2005-08-20',
+      lastCapture: '2023-09-15',
+      mimeType: 'application/pdf',
+      status: '200'
+    },
+    {
+      url: '/404.html',
+      snapshots: 8,
+      firstCapture: '2002-11-30',
+      lastCapture: '2023-07-20',
+      mimeType: 'text/html',
+      status: '404'
+    }
+  ];
 
   const filteredURLs = mockURLs.filter(urlEntry =>
     urlEntry.url.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -73,30 +186,28 @@ const URLs = () => {
       </div>
 
       {/* Stats */}
-      {websiteData && (
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-card border border-border p-3 text-center">
-            <div className="text-lg font-bold text-primary">{filteredURLs.length}</div>
-            <div className="text-xs text-muted-foreground">Total URLs</div>
-          </div>
-          <div className="bg-card border border-border p-3 text-center">
-            <div className="text-lg font-bold text-primary">
-              {filteredURLs.reduce((sum, url) => sum + url.snapshots, 0)}
-            </div>
-            <div className="text-xs text-muted-foreground">Total Snapshots</div>
-          </div>
-          <div className="bg-card border border-border p-3 text-center">
-            <div className="text-lg font-bold text-primary">
-              {new Set(filteredURLs.map(url => url.mimeType)).size}
-            </div>
-            <div className="text-xs text-muted-foreground">MIME Types</div>
-          </div>
-          <div className="bg-card border border-border p-3 text-center">
-            <div className="text-lg font-bold text-primary">{websiteData.timeSpan}</div>
-            <div className="text-xs text-muted-foreground">Time Span</div>
-          </div>
+      <div className="grid grid-cols-4 gap-4">
+        <div className="bg-card border border-border p-3 text-center">
+          <div className="text-lg font-bold text-primary">{filteredURLs.length}</div>
+          <div className="text-xs text-muted-foreground">Total URLs</div>
         </div>
-      )}
+        <div className="bg-card border border-border p-3 text-center">
+          <div className="text-lg font-bold text-primary">
+            {filteredURLs.reduce((sum, url) => sum + url.snapshots, 0)}
+          </div>
+          <div className="text-xs text-muted-foreground">Total Snapshots</div>
+        </div>
+        <div className="bg-card border border-border p-3 text-center">
+          <div className="text-lg font-bold text-primary">
+            {new Set(filteredURLs.map(url => url.mimeType)).size}
+          </div>
+          <div className="text-xs text-muted-foreground">MIME Types</div>
+        </div>
+        <div className="bg-card border border-border p-3 text-center">
+          <div className="text-lg font-bold text-primary">24y</div>
+          <div className="text-xs text-muted-foreground">Time Span</div>
+        </div>
+      </div>
 
       {/* URL Table */}
       <div className="bg-card border border-border">
