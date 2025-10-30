@@ -268,7 +268,7 @@ export const generateCalendarData = (url: string, year: number, month: number) =
   for (let day = 1; day <= daysInMonth; day++) {
     const snapshots = Math.random() > 0.4 ? Math.floor(Math.random() * 15 * multiplier) + 1 : 0;
     if (snapshots > 0) {
-      data[`${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`] = snapshots;
+      data[`${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`] = snapshots;
     }
   }
   return data;

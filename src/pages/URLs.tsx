@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ExternalLink, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,11 @@ const URLs = () => {
 
   const decodedUrl = url ? decodeURIComponent(url) : '';
   const websiteData = getWebsiteData(decodedUrl);
+
+  // Reset pagination when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   if (!websiteData && decodedUrl) {
     return (
@@ -143,7 +148,7 @@ const URLs = () => {
                 </td>
                 <td>
                   <Link 
-                    to={`/calendar/${encodeURIComponent(decodedUrl + urlEntry.url)}`}
+                    to={`/calendar/${encodeURIComponent(decodedUrl)}`}
                     className="archive-link flex items-center space-x-1"
                   >
                     <ExternalLink className="w-3 h-3" />

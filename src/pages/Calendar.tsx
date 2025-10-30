@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,18 @@ const Calendar = () => {
 
   const decodedUrl = url ? decodeURIComponent(url) : '';
   const websiteData = getWebsiteData(decodedUrl);
+
+  // Memoize calendar data to prevent regeneration on every render
+  const calendarData = useMemo(() => {
+    const data: Record<string, Record<string, number>> = {};
+    years.forEach(year => {
+      months.forEach((_, monthIndex) => {
+        const key = `${year}-${monthIndex + 1}`;
+        data[key] = generateCalendarData(decodedUrl, year, monthIndex + 1);
+      });
+    });
+    return data;
+  }, [decodedUrl]);
 
   const getHeatmapClass = (count: number) => {
     if (count === 0) return 'heatmap-empty';
@@ -78,7 +90,7 @@ const Calendar = () => {
       <div className="bg-card border border-border p-6">
         <div className="grid grid-cols-12 gap-4">
           {months.map((month, monthIndex) => {
-            const monthData = generateCalendarData(decodedUrl, currentYear, monthIndex + 1);
+            const monthData = calendarData[`${currentYear}-${monthIndex + 1}`] || {};
             const daysInMonth = new Date(currentYear, monthIndex + 1, 0).getDate();
             
             return (

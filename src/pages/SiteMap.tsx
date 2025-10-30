@@ -76,7 +76,7 @@ const SiteMap = () => {
           </span>
           
           <Link 
-            to={`/calendar/${encodeURIComponent(decodedUrl + node.path)}`}
+            to={`/calendar/${encodeURIComponent(decodedUrl)}`}
             className="text-primary hover:underline text-xs"
             onClick={(e) => e.stopPropagation()}
           >
