@@ -14,6 +14,7 @@ const Calendar = () => {
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ];
+  const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   const decodedUrl = url ? decodeURIComponent(url) : '';
   const websiteData = getWebsiteData(decodedUrl);
@@ -88,15 +89,29 @@ const Calendar = () => {
 
       {/* Year Grid */}
       <div className="bg-card border border-border p-6">
-        <div className="grid grid-cols-12 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {months.map((month, monthIndex) => {
             const monthData = calendarData[`${currentYear}-${monthIndex + 1}`] || {};
             const daysInMonth = new Date(currentYear, monthIndex + 1, 0).getDate();
+            const firstDayOfMonth = new Date(currentYear, monthIndex, 1).getDay();
             
             return (
-              <div key={month} className="space-y-2">
-                <h3 className="text-xs font-bold text-center mb-1">{month}</h3>
-                <div className="grid grid-cols-7 gap-0.5">
+              <div key={month} className="calendar-month">
+                <h3 className="text-sm font-bold text-center mb-2">{month}</h3>
+                <div className="calendar-grid">
+                  {/* Weekday headers */}
+                  {weekdays.map((day, idx) => (
+                    <div key={`weekday-${idx}`} className="calendar-weekday">
+                      {day}
+                    </div>
+                  ))}
+                  
+                  {/* Leading blank cells */}
+                  {Array.from({ length: firstDayOfMonth }, (_, idx) => (
+                    <div key={`blank-${idx}`} className="calendar-empty" />
+                  ))}
+                  
+                  {/* Day cells */}
                   {Array.from({ length: daysInMonth }, (_, day) => {
                     const dateStr = `${currentYear}-${(monthIndex + 1).toString().padStart(2, '0')}-${(day + 1).toString().padStart(2, '0')}`;
                     const count = monthData[dateStr] || 0;
@@ -104,11 +119,12 @@ const Calendar = () => {
                     return (
                       <button
                         key={day}
-                        className={`heatmap-cell ${getHeatmapClass(count)} text-xs hover:ring-1 hover:ring-primary`}
+                        className={`heatmap-cell ${getHeatmapClass(count)}`}
                         onClick={() => setSelectedDate(count > 0 ? dateStr : null)}
                         title={count > 0 ? `${count} snapshots on ${dateStr}` : `No snapshots on ${dateStr}`}
+                        aria-label={count > 0 ? `${count} snapshots on ${dateStr}` : `No snapshots on ${dateStr}`}
                       >
-                        {day + 1}
+                        <span>{day + 1}</span>
                       </button>
                     );
                   })}
@@ -123,10 +139,10 @@ const Calendar = () => {
       <div className="flex items-center justify-center space-x-4 text-sm">
         <span>Less</span>
         <div className="flex space-x-1">
-          <div className="heatmap-cell heatmap-empty"></div>
-          <div className="heatmap-cell heatmap-low"></div>
-          <div className="heatmap-cell heatmap-medium"></div>
-          <div className="heatmap-cell heatmap-high"></div>
+          <div className="heatmap-cell heatmap-empty"><span> </span></div>
+          <div className="heatmap-cell heatmap-low"><span> </span></div>
+          <div className="heatmap-cell heatmap-medium"><span> </span></div>
+          <div className="heatmap-cell heatmap-high"><span> </span></div>
         </div>
         <span>More</span>
       </div>

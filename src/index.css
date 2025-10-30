@@ -136,22 +136,65 @@
   }
   
   .heatmap-cell {
-    @apply w-7 h-7 min-w-[1.75rem] min-h-[1.75rem] border border-border cursor-pointer flex items-center justify-center text-xs transition-all;
+    @apply relative flex items-center justify-center;
+    @apply w-7 sm:w-8 md:w-9 aspect-square;
+    @apply border border-border cursor-pointer rounded;
+    @apply transition-all;
+    box-sizing: border-box;
+  }
+  
+  .heatmap-cell span {
+    @apply font-medium leading-none;
+    font-size: 11px;
+    line-height: 1.1;
+  }
+  
+  @media (min-width: 640px) {
+    .heatmap-cell span {
+      font-size: 12px;
+    }
   }
   
   .heatmap-empty {
-    @apply bg-muted;
+    @apply bg-muted text-foreground;
   }
   
   .heatmap-low {
-    @apply bg-primary/20;
+    @apply text-foreground;
+    background-color: hsl(var(--archive-blue-light));
   }
   
   .heatmap-medium {
-    @apply bg-primary/50;
+    @apply text-foreground;
+    background-color: hsl(var(--primary) / 0.5);
   }
   
   .heatmap-high {
-    @apply bg-primary/80;
+    @apply text-primary-foreground;
+    background-color: hsl(var(--primary) / 0.85);
+  }
+  
+  .heatmap-cell:hover {
+    @apply ring-2 ring-primary;
+  }
+  
+  .heatmap-cell:focus-visible {
+    @apply outline-2 outline-primary outline-offset-2;
+  }
+  
+  .calendar-month {
+    @apply space-y-2;
+  }
+  
+  .calendar-grid {
+    @apply grid grid-cols-7 gap-1 sm:gap-1.5;
+  }
+  
+  .calendar-weekday {
+    @apply text-xs text-muted-foreground text-center font-normal opacity-70;
+  }
+  
+  .calendar-empty {
+    @apply aspect-square;
   }
 }
