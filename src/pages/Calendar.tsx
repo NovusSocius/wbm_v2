@@ -95,8 +95,8 @@ const Calendar = () => {
             
             return (
               <div key={month} className="space-y-2">
-                <h3 className="text-sm font-bold text-center">{month}</h3>
-                <div className="grid grid-cols-7 gap-1">
+                <h3 className="text-xs font-bold text-center mb-1">{month}</h3>
+                <div className="grid grid-cols-7 gap-0.5">
                   {Array.from({ length: daysInMonth }, (_, day) => {
                     const dateStr = `${currentYear}-${(monthIndex + 1).toString().padStart(2, '0')}-${(day + 1).toString().padStart(2, '0')}`;
                     const count = monthData[dateStr] || 0;

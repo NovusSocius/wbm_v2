@@ -136,7 +136,7 @@
   }
   
   .heatmap-cell {
-    @apply w-3 h-3 border border-border cursor-pointer;
+    @apply w-7 h-7 min-w-[1.75rem] min-h-[1.75rem] border border-border cursor-pointer flex items-center justify-center text-xs transition-all;
   }
   
   .heatmap-empty {
