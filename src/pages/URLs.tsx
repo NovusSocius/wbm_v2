@@ -1,20 +1,34 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { ExternalLink, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useUrlState } from "@/context/UrlContext";
 import { getWebsiteData } from "@/data/mockWebsiteData";
 
 const URLs = () => {
-  const { url } = useParams();
+  const { url: paramUrl } = useParams();
+  const location = useLocation();
+  const { url, setUrl } = useUrlState();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
 
-  const decodedUrl = url ? decodeURIComponent(url) : '';
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const queryUrl = params.get("url");
+    const trimmedQuery = queryUrl?.trim();
+    const fromParam = paramUrl ? decodeURIComponent(paramUrl) : undefined;
+    const nextUrl = trimmedQuery && trimmedQuery.length > 0 ? trimmedQuery : fromParam;
+
+    if (nextUrl && nextUrl !== url) {
+      setUrl(nextUrl);
+    }
+  }, [location.search, paramUrl, setUrl, url]);
+
+  const decodedUrl = url;
   const websiteData = getWebsiteData(decodedUrl);
 
-  // Reset pagination when search term changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
@@ -139,16 +153,16 @@ const URLs = () => {
                 </td>
                 <td className="text-center">
                   <span className={`px-2 py-1 rounded text-xs ${
-                    urlEntry.status === '200' 
-                      ? 'bg-green-100 text-green-800' 
+                    urlEntry.status === '200'
+                      ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800'
                   }`}>
                     {urlEntry.status}
                   </span>
                 </td>
                 <td>
-                  <Link 
-                    to={`/calendar/${encodeURIComponent(decodedUrl)}`}
+                  <Link
+                    to={`/calendar?url=${encodeURIComponent(decodedUrl)}`}
                     className="archive-link flex items-center space-x-1"
                   >
                     <ExternalLink className="w-3 h-3" />
@@ -172,11 +186,11 @@ const URLs = () => {
           >
             Previous
           </Button>
-          
+
           <span className="flex items-center px-3 text-sm">
             Page {currentPage} of {totalPages}
           </span>
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -191,13 +205,13 @@ const URLs = () => {
       {/* Navigation Links */}
       {decodedUrl && (
         <div className="flex justify-center space-x-4">
-          <Link to={`/calendar/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+          <Link to={`/calendar?url=${encodeURIComponent(decodedUrl)}`} className="archive-button">
             Calendar View
           </Link>
-          <Link to={`/sitemap/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+          <Link to={`/sitemap?url=${encodeURIComponent(decodedUrl)}`} className="archive-button">
             Site Map
           </Link>
-          <Link to={`/summary/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+          <Link to={`/summary?url=${encodeURIComponent(decodedUrl)}`} className="archive-button">
             Summary
           </Link>
         </div>

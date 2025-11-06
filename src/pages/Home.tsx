@@ -1,23 +1,26 @@
-import { useState } from "react";
+import { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar, Map, List, BarChart3, Archive } from "lucide-react";
+import { useUrlState } from "@/context/UrlContext";
 
 const Home = () => {
-  const [url, setUrl] = useState("");
+  const { url, setUrl } = useUrlState();
   const navigate = useNavigate();
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: FormEvent) => {
     e.preventDefault();
-    if (url.trim()) {
-      navigate(`/calendar/${encodeURIComponent(url.trim())}`);
+    const trimmed = url.trim();
+    if (trimmed) {
+      navigate(`/calendar?url=${encodeURIComponent(trimmed)}`);
     }
   };
 
   const handleFeatureClick = (feature: string) => {
-    if (url.trim()) {
-      navigate(`/${feature}/${encodeURIComponent(url.trim())}`);
+    const trimmed = url.trim();
+    if (trimmed) {
+      navigate(`/${feature}?url=${encodeURIComponent(trimmed)}`);
     } else {
       navigate(`/${feature}`);
     }
@@ -31,7 +34,7 @@ const Home = () => {
           Wayback Machine
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Search archived web pages over time. Enter a URL to see its snapshots 
+          Search archived web pages over time. Enter a URL to see its snapshots
           from 1996 to present day.
         </p>
       </div>
@@ -47,9 +50,6 @@ const Home = () => {
               placeholder="Enter URL (e.g., example.com)"
               className="flex-1 font-mono"
             />
-            <Button type="submit" className="px-6">
-              Browse History
-            </Button>
           </div>
           <p className="text-sm text-muted-foreground">
             * Snapshots currently available: <strong>735 billion web pages</strong> saved over time
@@ -103,8 +103,8 @@ const Home = () => {
         <p className="text-muted-foreground mb-4">
           Explore curated archives organized by topic and time period
         </p>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={() => navigate('/collections')}
         >
           View All Collections
