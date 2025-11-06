@@ -1,13 +1,28 @@
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { ChevronRight, ChevronDown, Folder, File, ExternalLink } from "lucide-react";
+import { useUrlState } from "@/context/UrlContext";
 import { getWebsiteData, SiteNode } from "@/data/mockWebsiteData";
 
 const SiteMap = () => {
-  const { url } = useParams();
+  const { url: paramUrl } = useParams();
+  const location = useLocation();
+  const { url, setUrl } = useUrlState();
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['/']));
 
-  const decodedUrl = url ? decodeURIComponent(url) : '';
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const queryUrl = params.get("url");
+    const trimmedQuery = queryUrl?.trim();
+    const fromParam = paramUrl ? decodeURIComponent(paramUrl) : undefined;
+    const nextUrl = trimmedQuery && trimmedQuery.length > 0 ? trimmedQuery : fromParam;
+
+    if (nextUrl && nextUrl !== url) {
+      setUrl(nextUrl);
+    }
+  }, [location.search, paramUrl, setUrl, url]);
+
+  const decodedUrl = url;
   const websiteData = getWebsiteData(decodedUrl);
 
   if (!websiteData && decodedUrl) {
@@ -44,7 +59,7 @@ const SiteMap = () => {
 
     return (
       <div key={node.path}>
-        <div 
+        <div
           className="flex items-center space-x-2 py-1 hover:bg-accent cursor-pointer"
           style={{ paddingLeft: `${level * 20 + 8}px` }}
           onClick={() => hasChildren && toggleNode(node.path)}
@@ -58,32 +73,32 @@ const SiteMap = () => {
           ) : (
             <div className="w-4 h-4" />
           )}
-          
+
           {node.type === 'folder' ? (
             <Folder className="w-4 h-4 text-primary" />
           ) : (
             <File className="w-4 h-4 text-muted-foreground" />
           )}
-          
+
           <span className="flex-1 text-sm font-mono">{node.name}</span>
-          
+
           <span className="text-xs text-muted-foreground">
             {node.snapshots} snapshot{node.snapshots !== 1 ? 's' : ''}
           </span>
-          
+
           <span className="text-xs text-muted-foreground">
             {node.lastSnapshot}
           </span>
-          
-          <Link 
-            to={`/calendar/${encodeURIComponent(decodedUrl)}`}
+
+          <Link
+            to={`/calendar?url=${encodeURIComponent(decodedUrl)}`}
             className="text-primary hover:underline text-xs"
             onClick={(e) => e.stopPropagation()}
           >
             <ExternalLink className="w-3 h-3" />
           </Link>
         </div>
-        
+
         {hasChildren && isExpanded && (
           <div>
             {node.children!.map(child => renderNode(child, level + 1))}
@@ -115,7 +130,7 @@ const SiteMap = () => {
             <span>Last Captured</span>
           </div>
         </div>
-        
+
         <div className="p-2">
           {siteData && renderNode(siteData)}
         </div>
@@ -142,13 +157,13 @@ const SiteMap = () => {
       {/* Navigation Links */}
       {decodedUrl && (
         <div className="flex justify-center space-x-4">
-          <Link to={`/calendar/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+          <Link to={`/calendar?url=${encodeURIComponent(decodedUrl)}`} className="archive-button">
             Calendar View
           </Link>
-          <Link to={`/urls/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+          <Link to={`/urls?url=${encodeURIComponent(decodedUrl)}`} className="archive-button">
             URL List
           </Link>
-          <Link to={`/summary/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+          <Link to={`/summary?url=${encodeURIComponent(decodedUrl)}`} className="archive-button">
             Summary
           </Link>
         </div>

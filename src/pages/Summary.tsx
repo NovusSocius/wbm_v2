@@ -1,11 +1,27 @@
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { BarChart3, PieChart, Calendar, TrendingUp } from "lucide-react";
+import { useEffect } from "react";
+import { useParams, Link, useLocation } from "react-router-dom";
+import { BarChart3, PieChart, Calendar as CalendarIcon, TrendingUp } from "lucide-react";
+import { useUrlState } from "@/context/UrlContext";
 import { getWebsiteData } from "@/data/mockWebsiteData";
 
 const Summary = () => {
-  const { url } = useParams();
-  const decodedUrl = url ? decodeURIComponent(url) : '';
+  const { url: paramUrl } = useParams();
+  const location = useLocation();
+  const { url, setUrl } = useUrlState();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const queryUrl = params.get("url");
+    const trimmedQuery = queryUrl?.trim();
+    const fromParam = paramUrl ? decodeURIComponent(paramUrl) : undefined;
+    const nextUrl = trimmedQuery && trimmedQuery.length > 0 ? trimmedQuery : fromParam;
+
+    if (nextUrl && nextUrl !== url) {
+      setUrl(nextUrl);
+    }
+  }, [location.search, paramUrl, setUrl, url]);
+
+  const decodedUrl = url;
   const websiteData = getWebsiteData(decodedUrl);
 
   if (!websiteData && decodedUrl) {
@@ -77,7 +93,7 @@ const Summary = () => {
                   <span>{mime.count} ({mime.percentage}%)</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-primary h-2 rounded-full transition-all duration-300"
                     style={{ width: `${mime.percentage}%` }}
                   ></div>
@@ -98,7 +114,7 @@ const Summary = () => {
               <div key={index} className="flex items-center space-x-3">
                 <span className="text-sm font-mono w-12">{stat.year}</span>
                 <div className="flex-1 bg-muted rounded-full h-4 relative">
-                  <div 
+                  <div
                     className="bg-primary h-4 rounded-full transition-all duration-300"
                     style={{ width: `${(stat.captures / maxCaptures) * 100}%` }}
                   ></div>
@@ -114,7 +130,7 @@ const Summary = () => {
       <div className="bg-card border border-border">
         <div className="p-4 border-b border-border">
           <h2 className="font-bold flex items-center space-x-2">
-            <Calendar className="w-5 h-5" />
+            <CalendarIcon className="w-5 h-5" />
             <span>Last 10 Captures</span>
           </h2>
         </div>
@@ -123,7 +139,7 @@ const Summary = () => {
             <thead>
               <tr>
                 <th>Date</th>
-                <th>Time</th>  
+                <th>Time</th>
                 <th>URL</th>
                 <th>Status</th>
                 <th>Size</th>
@@ -140,8 +156,8 @@ const Summary = () => {
                   </td>
                   <td className="text-center">
                     <span className={`px-2 py-1 rounded text-xs ${
-                      capture.status === '200' 
-                        ? 'bg-green-100 text-green-800' 
+                      capture.status === '200'
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
                       {capture.status}
@@ -149,7 +165,7 @@ const Summary = () => {
                   </td>
                   <td className="text-sm">{capture.size}</td>
                   <td>
-                    <Link 
+                    <Link
                       to="#"
                       className="archive-link text-sm"
                     >
@@ -169,7 +185,7 @@ const Summary = () => {
           <PieChart className="w-5 h-5" />
           <span>Archive Timeline</span>
         </h2>
-          <div className="space-y-4">
+        <div className="space-y-4">
           <div className="flex items-center justify-between p-3 bg-muted rounded">
             <div>
               <div className="font-semibold">First Capture</div>
@@ -189,13 +205,13 @@ const Summary = () => {
       {/* Navigation Links */}
       {decodedUrl && (
         <div className="flex justify-center space-x-4">
-          <Link to={`/calendar/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+          <Link to={`/calendar?url=${encodeURIComponent(decodedUrl)}`} className="archive-button">
             Calendar View
           </Link>
-          <Link to={`/sitemap/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+          <Link to={`/sitemap?url=${encodeURIComponent(decodedUrl)}`} className="archive-button">
             Site Map
           </Link>
-          <Link to={`/urls/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+          <Link to={`/urls?url=${encodeURIComponent(decodedUrl)}`} className="archive-button">
             URL List
           </Link>
         </div>

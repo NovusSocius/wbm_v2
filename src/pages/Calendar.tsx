@@ -1,14 +1,29 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useUrlState } from "@/context/UrlContext";
 import { getWebsiteData, generateCalendarData } from "@/data/mockWebsiteData";
 
 const Calendar = () => {
-  const { url } = useParams();
+  const { url: paramUrl } = useParams();
+  const location = useLocation();
+  const { url, setUrl } = useUrlState();
   const [currentYear, setCurrentYear] = useState(2023);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const queryUrl = params.get("url");
+    const trimmedQuery = queryUrl?.trim();
+    const fromParam = paramUrl ? decodeURIComponent(paramUrl) : undefined;
+    const nextUrl = trimmedQuery && trimmedQuery.length > 0 ? trimmedQuery : fromParam;
+
+    if (nextUrl && nextUrl !== url) {
+      setUrl(nextUrl);
+    }
+  }, [location.search, paramUrl, setUrl, url]);
+
   const years = Array.from({ length: 28 }, (_, i) => 1996 + i);
   const months = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -16,10 +31,9 @@ const Calendar = () => {
   ];
   const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-  const decodedUrl = url ? decodeURIComponent(url) : '';
+  const decodedUrl = url;
   const websiteData = getWebsiteData(decodedUrl);
 
-  // Memoize calendar data to prevent regeneration on every render
   const calendarData = useMemo(() => {
     const data: Record<string, Record<string, number>> = {};
     years.forEach(year => {
@@ -67,8 +81,8 @@ const Calendar = () => {
           )}
         </div>
         <div className="flex items-center space-x-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => setCurrentYear(Math.max(1996, currentYear - 1))}
             disabled={currentYear <= 1996}
@@ -76,8 +90,8 @@ const Calendar = () => {
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <span className="text-lg font-bold min-w-16 text-center">{currentYear}</span>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => setCurrentYear(Math.min(2023, currentYear + 1))}
             disabled={currentYear >= 2023}
@@ -94,7 +108,7 @@ const Calendar = () => {
             const monthData = calendarData[`${currentYear}-${monthIndex + 1}`] || {};
             const daysInMonth = new Date(currentYear, monthIndex + 1, 0).getDate();
             const firstDayOfMonth = new Date(currentYear, monthIndex, 1).getDay();
-            
+
             return (
               <div key={month} className="calendar-month">
                 <h3 className="text-sm font-bold text-center mb-2">{month}</h3>
@@ -105,17 +119,17 @@ const Calendar = () => {
                       {day}
                     </div>
                   ))}
-                  
+
                   {/* Leading blank cells */}
                   {Array.from({ length: firstDayOfMonth }, (_, idx) => (
                     <div key={`blank-${idx}`} className="calendar-empty" />
                   ))}
-                  
+
                   {/* Day cells */}
                   {Array.from({ length: daysInMonth }, (_, day) => {
                     const dateStr = `${currentYear}-${(monthIndex + 1).toString().padStart(2, '0')}-${(day + 1).toString().padStart(2, '0')}`;
                     const count = monthData[dateStr] || 0;
-                    
+
                     return (
                       <button
                         key={day}
@@ -173,13 +187,13 @@ const Calendar = () => {
       {/* Navigation Links */}
       {decodedUrl && (
         <div className="flex justify-center space-x-4">
-          <Link to={`/sitemap/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+          <Link to={`/sitemap?url=${encodeURIComponent(decodedUrl)}`} className="archive-button">
             Site Map
           </Link>
-          <Link to={`/urls/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+          <Link to={`/urls?url=${encodeURIComponent(decodedUrl)}`} className="archive-button">
             URL List
           </Link>
-          <Link to={`/summary/${encodeURIComponent(decodedUrl)}`} className="archive-button">
+          <Link to={`/summary?url=${encodeURIComponent(decodedUrl)}`} className="archive-button">
             Summary
           </Link>
         </div>
